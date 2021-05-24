@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.19)
-project(simple_movement)
+project(RaccoonEcsBenchmark)
 
 set(CMAKE_CXX_STANDARD 20)
-set(GOOGLE_BENCHMARK_DIR "../../../benchmark")
+set(GOOGLE_BENCHMARK_DIR "../benchmark")
 
 include_directories(
 	"${GOOGLE_BENCHMARK_DIR}/include"
-	"../../raccoon-ecs"
+	"raccoon-ecs"
 )
 
 set(SOURCES
@@ -14,11 +14,11 @@ set(SOURCES
 	main.cpp
 )
 
-add_executable(simple_movement main.cpp ComponentsToBenchmark.h)
+add_executable(RaccoonEcsBenchmark main.cpp ComponentsToBenchmark.h)
 
 find_library(GOOGLE_BENCHMARK_LIB benchmark HINTS ${GOOGLE_BENCHMARK_DIR}/build/src)
 
-target_link_libraries(simple_movement
+target_link_libraries(RaccoonEcsBenchmark
 	${GOOGLE_BENCHMARK_LIB}
 	pthread
 )

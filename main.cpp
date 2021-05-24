@@ -2,11 +2,14 @@
 
 #include <random>
 #include <chrono>
+#include <memory>
+#include <deque>
 
 #include <benchmark/benchmark.h>
 
 #include "ComponentsToBenchmark.h"
 
+// Create empty entity manager
 static void BM_EmptyEntityManagerCreation(benchmark::State& state) {
 	for (auto _ : state)
 	{
@@ -15,8 +18,8 @@ static void BM_EmptyEntityManagerCreation(benchmark::State& state) {
 		EntityManager entityManager(componentFactory, entityGenerator);
 	}
 }
-BENCHMARK(BM_EmptyEntityManagerCreation);
 
+// Add one entity without components
 static void BM_EmptyEntityAddition(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	EntityGenerator entityGenerator;
@@ -27,8 +30,8 @@ static void BM_EmptyEntityAddition(benchmark::State& state) {
 		entityManager.addEntity();
 	}
 }
-BENCHMARK(BM_EmptyEntityAddition);
 
+// Add one entity with one component
 static void BM_CreateEntityWithOneComponent(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -41,8 +44,8 @@ static void BM_CreateEntityWithOneComponent(benchmark::State& state) {
 		entityManager.addComponent<ComponentOne>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithOneComponent);
 
+// Add one entity with one component while having one index (the component not in the index)
 static void BM_CreateEntityWithOneComponentWithOneNonMatchingIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -57,8 +60,8 @@ static void BM_CreateEntityWithOneComponentWithOneNonMatchingIndex(benchmark::St
 		entityManager.addComponent<ComponentOne>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithOneComponentWithOneNonMatchingIndex);
 
+// Add one entity with one component while having one index (the component in the index)
 static void BM_CreateEntityWithOneComponentInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -73,8 +76,8 @@ static void BM_CreateEntityWithOneComponentInOneIndex(benchmark::State& state) {
 		entityManager.addComponent<ComponentOne>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithOneComponentInOneIndex);
 
+// Add one entity with 16 components
 static void BM_CreateEntityWithSixteenComponents(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -102,8 +105,8 @@ static void BM_CreateEntityWithSixteenComponents(benchmark::State& state) {
 		entityManager.addComponent<ComponentSixteen>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithSixteenComponents);
 
+// Add one entity with 16 component while having 8 indexes (the components not in the indexes)
 static void BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -153,8 +156,8 @@ static void BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes(benc
 		entityManager.addComponent<ComponentSixteen>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes);
 
+// Add one entity with 16 component while having 1 small index (the components in the index)
 static void BM_CreateEntityWithSixteenComponentsInOneSmallIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -184,8 +187,8 @@ static void BM_CreateEntityWithSixteenComponentsInOneSmallIndex(benchmark::State
 		entityManager.addComponent<ComponentSixteen>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneSmallIndex);
 
+// Add one entity with 16 component while having 1 big index (the components in the index)
 static void BM_CreateEntityWithSixteenComponentsInOneBigIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -217,8 +220,8 @@ static void BM_CreateEntityWithSixteenComponentsInOneBigIndex(benchmark::State& 
 		entityManager.addComponent<ComponentSixteen>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneBigIndex);
 
+// Add one entity with 16 component while having 8 different index (the components are in the indexes)
 static void BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -275,21 +278,16 @@ static void BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes(benchmar
 		entityManager.addComponent<ComponentSixteen>(entity);
 	}
 }
-BENCHMARK(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes);
 
-static void BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities(benchmark::State& state) {
-	ComponentFactory componentFactory;
-	componentFactory.registerComponent<TransformComponent>();
-	componentFactory.registerComponent<MovementComponent>();
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
-
-	std::mt19937 rng(42);
-
-	for (size_t i = 0; i < 4000; ++i)
+static void PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(
+	EntityManager& entityManager,
+	std::mt19937& rng,
+	size_t entityCount
+	)
+{
+	for (size_t i = 0; i < entityCount; ++i)
 	{
 		Entity entity = entityManager.addEntity();
-
 		if (rng() % 2 == 0)
 		{
 			TransformComponent* transform = entityManager.addComponent<TransformComponent>(entity);
@@ -304,6 +302,18 @@ static void BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities(benchmark::
 			movement->speedPerTickY = 1.0f - 2.0f * rng() / rng.max();
 		}
 	}
+}
+
+// Iterate over matching pairs of components (around 1000) from 4000 entities
+static void BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities(benchmark::State& state) {
+	ComponentFactory componentFactory;
+	componentFactory.registerComponent<TransformComponent>();
+	componentFactory.registerComponent<MovementComponent>();
+	EntityGenerator entityGenerator;
+	EntityManager entityManager(componentFactory, entityGenerator);
+	std::mt19937 rng(42);
+
+	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, 4000);
 
 	for (auto _ : state)
 	{
@@ -314,8 +324,38 @@ static void BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities(benchmark::
 		});
 	}
 }
-BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities);
 
+// Iterate over matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each
+static void BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers(benchmark::State& state) {
+	ComponentFactory componentFactory;
+	componentFactory.registerComponent<TransformComponent>();
+	componentFactory.registerComponent<MovementComponent>();
+	EntityGenerator entityGenerator;
+	std::mt19937 rng(42);
+
+	std::deque<EntityManager> entityManagers;
+	for (size_t i = 0; i < 16; ++i)
+	{
+		entityManagers.emplace_back(componentFactory, entityGenerator);
+		PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
+	}
+
+	auto processor = [](MovementComponent* movement, TransformComponent* transform)
+	{
+		transform->x += movement->speedPerTickX;
+		transform->y += movement->speedPerTickY;
+	};
+
+	for (auto _ : state)
+	{
+		for (auto& entityManager : entityManagers)
+		{
+			entityManager.forEachComponentSet<MovementComponent, TransformComponent>(processor);
+		}
+	}
+}
+
+// Select matching pairs of components (around 1000) from 4000 entities
 static void BM_SelectAbout1000PairsOfComponentsFrom4000Entities(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
@@ -325,24 +365,7 @@ static void BM_SelectAbout1000PairsOfComponentsFrom4000Entities(benchmark::State
 
 	std::mt19937 rng(42);
 
-	for (size_t i = 0; i < 4000; ++i)
-	{
-		Entity entity = entityManager.addEntity();
-
-		if (rng() % 2 == 0)
-		{
-			TransformComponent* transform = entityManager.addComponent<TransformComponent>(entity);
-			transform->x = 100.0f * rng() / rng.max();
-			transform->y = 100.0f * rng() / rng.max();
-		}
-
-		if (rng() % 2 == 0)
-		{
-			MovementComponent* movement = entityManager.addComponent<MovementComponent>(entity);
-			movement->speedPerTickX = 1.0f - 2.0f * rng() / rng.max();
-			movement->speedPerTickY = 1.0f - 2.0f * rng() / rng.max();
-		}
-	}
+	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, 4000);
 
 	std::vector<std::tuple<MovementComponent*, TransformComponent*>> components;
 	components.reserve(1100);
@@ -353,8 +376,35 @@ static void BM_SelectAbout1000PairsOfComponentsFrom4000Entities(benchmark::State
 		entityManager.getComponents<MovementComponent, TransformComponent>(components);
 	}
 }
-BENCHMARK(BM_SelectAbout1000PairsOfComponentsFrom4000Entities);
 
+// Select matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each
+static void BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers(benchmark::State& state) {
+	ComponentFactory componentFactory;
+	componentFactory.registerComponent<TransformComponent>();
+	componentFactory.registerComponent<MovementComponent>();
+	EntityGenerator entityGenerator;
+	std::mt19937 rng(42);
+
+	std::deque<EntityManager> entityManagers;
+	for (size_t i = 0; i < 16; ++i)
+	{
+		entityManagers.emplace_back(componentFactory, entityGenerator);
+		PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
+	}
+
+	std::vector<std::tuple<MovementComponent*, TransformComponent*>> components;
+	components.reserve(17600);
+	for (auto _ : state)
+	{
+		components.clear();
+		for (auto& entityManager : entityManagers)
+		{
+			entityManager.getComponents<MovementComponent, TransformComponent>(components);
+		}
+	}
+}
+
+// Create and transfer entity without components to another entity manager
 static void BM_CreateAndTransferEmptyEntity(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	EntityGenerator entityGenerator;
@@ -367,8 +417,8 @@ static void BM_CreateAndTransferEmptyEntity(benchmark::State& state) {
 		entityManager1.transferEntityTo(entityManager2, entity);
 	}
 }
-BENCHMARK(BM_CreateAndTransferEmptyEntity);
 
+// Create and transfer entity with two components to another entity manager
 static void BM_CreateAndTransferEntityWithTwoComponents(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -384,9 +434,8 @@ static void BM_CreateAndTransferEntityWithTwoComponents(benchmark::State& state)
 		entityManager1.transferEntityTo(entityManager2, entity);
 	}
 }
-BENCHMARK(BM_CreateAndTransferEntityWithTwoComponents);
 
-
+// Create and transfer entity with two components to another entity manager (both have one index with both components)
 static void BM_CreateAndTransferEntityWithTwoComponentsInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -405,6 +454,23 @@ static void BM_CreateAndTransferEntityWithTwoComponentsInOneIndex(benchmark::Sta
 		entityManager1.transferEntityTo(entityManager2, entity);
 	}
 }
+
+BENCHMARK(BM_EmptyEntityManagerCreation);
+BENCHMARK(BM_EmptyEntityAddition);
+BENCHMARK(BM_CreateEntityWithOneComponent);
+BENCHMARK(BM_CreateEntityWithOneComponentWithOneNonMatchingIndex);
+BENCHMARK(BM_CreateEntityWithOneComponentInOneIndex);
+BENCHMARK(BM_CreateEntityWithSixteenComponents);
+BENCHMARK(BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes);
+BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneSmallIndex);
+BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneBigIndex);
+BENCHMARK(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes);
+BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities);
+BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers);
+BENCHMARK(BM_SelectAbout1000PairsOfComponentsFrom4000Entities);
+BENCHMARK(BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers);
+BENCHMARK(BM_CreateAndTransferEmptyEntity);
+BENCHMARK(BM_CreateAndTransferEntityWithTwoComponents);
 BENCHMARK(BM_CreateAndTransferEntityWithTwoComponentsInOneIndex);
 
 BENCHMARK_MAIN();
