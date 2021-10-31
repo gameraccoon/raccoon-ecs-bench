@@ -304,7 +304,8 @@ static void PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(
 	}
 }
 
-static void BenchmarkIterationsOverPairs(benchmark::State& state, size_t entitiesCount)
+static std::string BM_IterateOverAboutNEntities_Name = "Iterate over matching pairs of components, around 1/4 from total {N} entities";
+static void BM_IterateOverAboutNEntities(benchmark::State& state)
 {
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
@@ -313,6 +314,7 @@ static void BenchmarkIterationsOverPairs(benchmark::State& state, size_t entitie
 	EntityManager entityManager(componentFactory, entityGenerator);
 	std::mt19937 rng(42);
 
+	const size_t entitiesCount = static_cast<size_t>(state.range(0));
 	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
 	entityManager.initIndex<MovementComponent, TransformComponent>();
 
@@ -324,46 +326,7 @@ static void BenchmarkIterationsOverPairs(benchmark::State& state, size_t entitie
 			transform->y += movement->speedPerTickY;
 		});
 	}
-}
-
-static std::string BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities_Name = "Iterate over matching pairs of components (around 1000) from 4000 entities";
-static void BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 4000);
-}
-
-static std::string BM_IterateOver8000Entities_Name = "Iterate over matching pairs of components (around 2000) from 8000 entities";
-static void BM_IterateOver8000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 8000);
-}
-
-static std::string BM_IterateOver16000Entities_Name = "Iterate over matching pairs of components (around 4000) from 16000 entities";
-static void BM_IterateOver16000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 16000);
-}
-
-static std::string BM_IterateOver32000Entities_Name = "Iterate over matching pairs of components (around 8000) from 32000 entities";
-static void BM_IterateOver32000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 32000);
-}
-
-static std::string BM_IterateOver64000Entities_Name = "Iterate over matching pairs of components (around 16000) from 64000 entities";
-static void BM_IterateOver64000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 64000);
-}
-
-static std::string BM_IterateOver128000Entities_Name = "Iterate over matching pairs of components (around 32000) from 128000 entities";
-static void BM_IterateOver128000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 128000);
-}
-
-static std::string BM_IterateOver256000Entities_Name = "Iterate over matching pairs of components (around 64000) from 256000 entities";
-static void BM_IterateOver256000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 256000);
-}
-
-static std::string BM_IterateOver512000Entities_Name = "Iterate over matching pairs of components (around 128000) from 512000 entities";
-static void BM_IterateOver512000Entities(benchmark::State& state) {
-	BenchmarkIterationsOverPairs(state, 512000);
+	state.SetComplexityN(entitiesCount);
 }
 
 static std::string BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name = "Iterate over matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each";
@@ -396,26 +359,29 @@ static void BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16Entity
 	}
 }
 
-static std::string BM_SelectAbout1000PairsOfComponentsFrom4000Entities_Name = "Select matching pairs of components (around 1000) from 4000 entities";
-static void BM_SelectAbout1000PairsOfComponentsFrom4000Entities(benchmark::State& state) {
+static std::string BM_SelectPairsOfComponentsFromNEntities_Name = "Select matching pairs of components around 1/4 from total {N} entities";
+static void BM_SelectPairsOfComponentsFromNEntities(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
 	componentFactory.registerComponent<MovementComponent>();
 	EntityGenerator entityGenerator;
 	EntityManager entityManager(componentFactory, entityGenerator);
 
+	const size_t entitiesCount = static_cast<size_t>(state.range(0));
+
 	std::mt19937 rng(42);
 
-	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, 4000);
+	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
 
 	std::vector<std::tuple<MovementComponent*, TransformComponent*>> components;
-	components.reserve(1100);
+	components.reserve(entitiesCount / 3); // by 3 instead of 4 to have some spare space
 
 	for (auto _ : state)
 	{
 		components.clear();
 		entityManager.getComponents<MovementComponent, TransformComponent>(components);
 	}
+	state.SetComplexityN(entitiesCount);
 }
 
 static std::string BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name = "Select matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each";
@@ -506,18 +472,13 @@ BENCHMARK(BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes)->Name
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneSmallIndex)->Name(BM_CreateEntityWithSixteenComponentsInOneSmallIndex_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneBigIndex)->Name(BM_CreateEntityWithSixteenComponentsInOneBigIndex_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes)->Name(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes_Name);
-BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities)->Name(BM_IterateOverAbout1000PairsOfComponentsFrom4000Entities_Name);
 
-BENCHMARK(BM_IterateOver8000Entities)->Name(BM_IterateOver8000Entities_Name);
-BENCHMARK(BM_IterateOver16000Entities)->Name(BM_IterateOver16000Entities_Name);
-BENCHMARK(BM_IterateOver32000Entities)->Name(BM_IterateOver32000Entities_Name);
-BENCHMARK(BM_IterateOver64000Entities)->Name(BM_IterateOver64000Entities_Name);
-BENCHMARK(BM_IterateOver128000Entities)->Name(BM_IterateOver128000Entities_Name);
-BENCHMARK(BM_IterateOver256000Entities)->Name(BM_IterateOver256000Entities_Name);
-BENCHMARK(BM_IterateOver512000Entities)->Name(BM_IterateOver512000Entities_Name);
+BENCHMARK(BM_IterateOverAboutNEntities)->Name(BM_IterateOverAboutNEntities_Name)->RangeMultiplier(2)->Range(1<<10, (1<<18))->Complexity();
 
 BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers)->Name(BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name);
-BENCHMARK(BM_SelectAbout1000PairsOfComponentsFrom4000Entities)->Name(BM_SelectAbout1000PairsOfComponentsFrom4000Entities_Name);
+
+BENCHMARK(BM_SelectPairsOfComponentsFromNEntities)->Name(BM_SelectPairsOfComponentsFromNEntities_Name)->RangeMultiplier(2)->Range(1<<10, (1<<18))->Complexity();
+
 BENCHMARK(BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers)->Name(BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name);
 BENCHMARK(BM_CreateAndTransferEmptyEntity)->Name(BM_CreateAndTransferEmptyEntity_Name);
 BENCHMARK(BM_CreateAndTransferEntityWithTwoComponents)->Name(BM_CreateAndTransferEntityWithTwoComponents_Name);

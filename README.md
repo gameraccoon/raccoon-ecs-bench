@@ -1,36 +1,50 @@
-2021-10-31T11:42:33+01:00  
-Run on (4 X 2560 MHz CPU s)  
+2021-10-31T14:51:10+01:00  
+Run on (4 X 2561 MHz CPU s)  
 CPU Caches:  
 &nbsp;&nbsp;&nbsp;&nbsp;L1 Data 24.0 KiB (x4)  
 &nbsp;&nbsp;&nbsp;&nbsp;L1 Instruction 32.0 KiB (x4)  
 &nbsp;&nbsp;&nbsp;&nbsp;L2 Unified 1024.0 KiB (x2)  
-Load Average: 0.43, 0.7, 0.77
+Load Average: 1.74, 1.27, 1.02
 
-***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
-
+### Benchmarks
 Benchmark | Time | CPU | Iterations
 --- | --- | --- | ---
-Create empty entity manager | 189 ns | 189 ns | 3661629
-Add one entity without components | 240 ns | 240 ns | 2647549
-Add one entity with one component | 364 ns | 364 ns | 2060151
-Add one entity with one component while having one index (the component not in the index) | 394 ns | 392 ns | 2233130
-Add one entity with one component while having one index (the component in the index) | 470 ns | 470 ns | 1800064
-Add one entity with 16 components | 3249 ns | 3246 ns | 245218
-Add one entity with 16 components while having 8 indexes (the components not in the indexes) | 4368 ns | 4366 ns | 158865
-Add one entity with 16 components while having 1 small index (the components in the index) | 3497 ns | 3496 ns | 231606
-Add one entity with 16 components while having 1 big index (the components in the index) | 6584 ns | 6583 ns | 105075
-Add one entity with 16 components while having 8 different index (the components are in the indexes) | 11506 ns | 11503 ns | 60400
-Iterate over matching pairs of components (around 1000) from 4000 entities | 7881 ns | 7853 ns | 87948
-Iterate over matching pairs of components (around 2000) from 8000 entities | 15940 ns | 15939 ns | 44432
-Iterate over matching pairs of components (around 4000) from 16000 entities | 33286 ns | 33280 ns | 20996
-Iterate over matching pairs of components (around 8000) from 32000 entities | 89662 ns | 89647 ns | 7820
-Iterate over matching pairs of components (around 16000) from 64000 entities | 372684 ns | 371112 ns | 1883
-Iterate over matching pairs of components (around 32000) from 128000 entities | 770613 ns | 770438 ns | 914
-Iterate over matching pairs of components (around 64000) from 256000 entities | 1559692 ns | 1559615 ns | 442
-Iterate over matching pairs of components (around 128000) from 512000 entities | 3056204 ns | 3055853 ns | 230
-Iterate over matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each | 411409 ns | 409534 ns | 1785
-Select matching pairs of components (around 1000) from 4000 entities | 6441 ns | 6435 ns | 107450
-Select matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each | 312887 ns | 312698 ns | 2212
-Create and transfer entity without components to another entity manager | 394 ns | 393 ns | 1856947
-Create and transfer entity with two components to another entity manager | 868 ns | 867 ns | 811132
-Create and transfer entity with two components to another entity manager (both have one index with both components) | 1195 ns | 1190 ns | 605930
+Create empty entity manager | 189 ns | 189 ns | 3687456
+Add one entity without components | 239 ns | 239 ns | 2643231
+Add one entity with one component | 388 ns | 386 ns | 2021128
+Add one entity with one component while having one index (the component not in the index) | 404 ns | 404 ns | 2204270
+Add one entity with one component while having one index (the component in the index) | 465 ns | 465 ns | 1624274
+Add one entity with 16 components | 3268 ns | 3257 ns | 243775
+Add one entity with 16 components while having 8 indexes (the components not in the indexes) | 4557 ns | 4537 ns | 155182
+Add one entity with 16 components while having 1 small index (the components in the index) | 3683 ns | 3682 ns | 225319
+Add one entity with 16 components while having 1 big index (the components in the index) | 6591 ns | 6584 ns | 105212
+Add one entity with 16 components while having 8 different index (the components are in the indexes) | 11519 ns | 11518 ns | 59792
+Iterate over matching pairs of components, around 1/4 from total 1024 entities | 1634 ns | 1634 ns | 427514
+Iterate over matching pairs of components, around 1/4 from total 2048 entities | 4052 ns | 4052 ns | 172562
+Iterate over matching pairs of components, around 1/4 from total 4096 entities | 8082 ns | 8081 ns | 85462
+Iterate over matching pairs of components, around 1/4 from total 8192 entities | 16233 ns | 16179 ns | 42693
+Iterate over matching pairs of components, around 1/4 from total 16384 entities | 34097 ns | 34092 ns | 20471
+Iterate over matching pairs of components, around 1/4 from total 32768 entities | 103777 ns | 103763 ns | 5627
+Iterate over matching pairs of components, around 1/4 from total 65536 entities | 399869 ns | 399805 ns | 1867
+Iterate over matching pairs of components, around 1/4 from total 131072 entities | 799780 ns | 799523 ns | 870
+Iterate over matching pairs of components, around 1/4 from total 262144 entities | 1580697 ns | 1579567 ns | 444
+Iterate over matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each | 391886 ns | 391774 ns | 1788
+Select matching pairs of components around 1/4 from total 1024 entities | 1371 ns | 1366 ns | 512661
+Select matching pairs of components around 1/4 from total 2048 entities | 3319 ns | 3319 ns | 208240
+Select matching pairs of components around 1/4 from total 4096 entities | 6581 ns | 6579 ns | 105880
+Select matching pairs of components around 1/4 from total 8192 entities | 12963 ns | 12960 ns | 54357
+Select matching pairs of components around 1/4 from total 16384 entities | 25785 ns | 25692 ns | 27353
+Select matching pairs of components around 1/4 from total 32768 entities | 61424 ns | 61417 ns | 11239
+Select matching pairs of components around 1/4 from total 65536 entities | 254831 ns | 254790 ns | 2791
+Select matching pairs of components around 1/4 from total 131072 entities | 659030 ns | 658502 ns | 1032
+Select matching pairs of components around 1/4 from total 262144 entities | 1336463 ns | 1332489 ns | 495
+Select matching pairs of components (around 1000 per entity manager) from 16 entity managers having 4000 entities each | 308694 ns | 308610 ns | 2372
+Create and transfer entity without components to another entity manager | 392 ns | 392 ns | 1861510
+Create and transfer entity with two components to another entity manager | 866 ns | 865 ns | 823211
+Create and transfer entity with two components to another entity manager (both have one index with both components) | 1185 ns | 1185 ns | 602711
+
+### BigO Complexities
+Benchmark | Complexity | Coefficient
+--- | --- | ---
+Iterate over matching pairs of components, around 1/4 from total **N** entities | NlgN | 0.34
+Select matching pairs of components around 1/4 from total **N** entities | NlgN | 0.28

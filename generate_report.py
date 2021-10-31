@@ -3,6 +3,7 @@
 import json
 import os
 import shutil
+import sys
 
 
 def remove_old_results():
@@ -47,9 +48,27 @@ def convert_gbench_json_result_to_markdown(json_path):
 		if context["cpu_scaling_enabled"]:
 			md_description += "***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.\n\n"
 
-		md_description += "Benchmark | Time | CPU | Iterations\n--- | --- | --- | ---\n"
+		md_description += "### Benchmarks\nBenchmark | Time | CPU | Iterations\n--- | --- | --- | ---\n"
+		aggregate_benchmarks = []
 		for benchmark in results_data["benchmarks"]:
-			md_description += "{name} | {real_time:.0f} ns | {cpu_time:.0f} ns | {iterations}\n".format(**benchmark)
+			if benchmark["run_type"] == "iteration":
+				if benchmark["name"].find("{N}") != -1:
+					slash_index = benchmark["name"].rfind("/")
+					benchmark["name"] = benchmark["name"][:slash_index].replace("{N}", benchmark["name"][slash_index+1:])
+				md_description += "{name} | {real_time:.0f} ns | {cpu_time:.0f} ns | {iterations}\n".format(**benchmark)
+			elif benchmark["run_type"] == "aggregate":
+				aggregate_benchmarks.append(benchmark)
+			else:
+				print("unknown benchmark type '{run_type}'".format(**benchmark))
+				sys.exit(1)
+
+		if len(aggregate_benchmarks) > 0:
+			md_description += "\n### BigO Complexities\nBenchmark | Complexity | Coefficient\n--- | --- | ---\n"
+			for benchmark in aggregate_benchmarks:
+				if benchmark["aggregate_name"] == "BigO":
+					benchmark["name"] = benchmark["name"][:-5].replace("{N}", "**N**")
+					md_description += "{name} | {big_o} | {cpu_coefficient:.2f}\n".format(**benchmark)
+
 
 	return md_description
 
