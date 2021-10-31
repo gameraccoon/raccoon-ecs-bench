@@ -9,7 +9,7 @@
 
 #include "ComponentsToBenchmark.h"
 
-static std::string BM_EmptyEntityManagerCreation_Name = "Create empty entity manager";
+static std::string BM_EmptyEntityManagerCreation_Name = "Create an empty entity manager";
 static void BM_EmptyEntityManagerCreation(benchmark::State& state) {
 	for (auto _ : state)
 	{
@@ -45,7 +45,7 @@ static void BM_CreateEntityWithOneComponent(benchmark::State& state) {
 	}
 }
 
-static std::string BM_CreateEntityWithOneComponentWithOneNonMatchingIndex_Name = "Add one entity with one component while having one index (the component not in the index)";
+static std::string BM_CreateEntityWithOneComponentWithOneNonMatchingIndex_Name = "Add one entity with one component while having one index (the component is not in the index)";
 static void BM_CreateEntityWithOneComponentWithOneNonMatchingIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -61,7 +61,7 @@ static void BM_CreateEntityWithOneComponentWithOneNonMatchingIndex(benchmark::St
 	}
 }
 
-static std::string BM_CreateEntityWithOneComponentInOneIndex_Name = "Add one entity with one component while having one index (the component in the index)";
+static std::string BM_CreateEntityWithOneComponentInOneIndex_Name = "Add one entity with one component while having one index (the component is in the index)";
 static void BM_CreateEntityWithOneComponentInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -75,6 +75,27 @@ static void BM_CreateEntityWithOneComponentInOneIndex(benchmark::State& state) {
 		Entity entity = entityManager.addEntity();
 		entityManager.addComponent<ComponentOne>(entity);
 	}
+}
+
+static std::string BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneIndex_Name = "[Aggregate only] Create an entity manager, add one index and {N} entities with one component each (the component is in the index)";
+static void BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneIndex(benchmark::State& state) {
+	ComponentFactory componentFactory;
+	RegisterNumberedComponents(componentFactory);
+	EntityGenerator entityGenerator;
+
+	const int componentsCount = state.range(0);
+
+	for (auto _ : state)
+	{
+		EntityManager entityManager(componentFactory, entityGenerator);
+		entityManager.initIndex<ComponentOne>();
+		for (int i = 0; i < componentsCount; ++i)
+		{
+			Entity entity = entityManager.addEntity();
+			entityManager.addComponent<ComponentOne>(entity);
+		}
+	}
+	state.SetComplexityN(componentsCount);
 }
 
 static std::string BM_CreateEntityWithSixteenComponents_Name = "Add one entity with 16 components";
@@ -106,7 +127,7 @@ static void BM_CreateEntityWithSixteenComponents(benchmark::State& state) {
 	}
 }
 
-static std::string BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes_Name = "Add one entity with 16 components while having 8 indexes (the components not in the indexes)";
+static std::string BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes_Name = "Add one entity with 16 components while having 8 indexes (the components are not in the indexes)";
 static void BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -157,7 +178,7 @@ static void BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes(benc
 	}
 }
 
-static std::string BM_CreateEntityWithSixteenComponentsInOneSmallIndex_Name = "Add one entity with 16 components while having 1 small index (the components in the index)";
+static std::string BM_CreateEntityWithSixteenComponentsInOneSmallIndex_Name = "Add one entity with 16 components while having 1 small index (the components are in the index)";
 static void BM_CreateEntityWithSixteenComponentsInOneSmallIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -188,7 +209,7 @@ static void BM_CreateEntityWithSixteenComponentsInOneSmallIndex(benchmark::State
 	}
 }
 
-static std::string BM_CreateEntityWithSixteenComponentsInOneBigIndex_Name = "Add one entity with 16 components while having 1 big index (the components in the index)";
+static std::string BM_CreateEntityWithSixteenComponentsInOneBigIndex_Name = "Add one entity with 16 components while having 1 big index (the components are in the index)";
 static void BM_CreateEntityWithSixteenComponentsInOneBigIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
@@ -467,17 +488,20 @@ BENCHMARK(BM_EmptyEntityAddition)->Name(BM_EmptyEntityAddition_Name);
 BENCHMARK(BM_CreateEntityWithOneComponent)->Name(BM_CreateEntityWithOneComponent_Name);
 BENCHMARK(BM_CreateEntityWithOneComponentWithOneNonMatchingIndex)->Name(BM_CreateEntityWithOneComponentWithOneNonMatchingIndex_Name);
 BENCHMARK(BM_CreateEntityWithOneComponentInOneIndex)->Name(BM_CreateEntityWithOneComponentInOneIndex_Name);
+
+BENCHMARK(BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneIndex)->Name(BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneIndex_Name)->RangeMultiplier(2)->Range(1, 1<<18)->Complexity();
+
 BENCHMARK(BM_CreateEntityWithSixteenComponents)->Name(BM_CreateEntityWithSixteenComponents_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes)->Name(BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneSmallIndex)->Name(BM_CreateEntityWithSixteenComponentsInOneSmallIndex_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInOneBigIndex)->Name(BM_CreateEntityWithSixteenComponentsInOneBigIndex_Name);
 BENCHMARK(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes)->Name(BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes_Name);
 
-BENCHMARK(BM_IterateOverAboutNEntities)->Name(BM_IterateOverAboutNEntities_Name)->RangeMultiplier(2)->Range(1<<10, (1<<18))->Complexity();
+BENCHMARK(BM_IterateOverAboutNEntities)->Name(BM_IterateOverAboutNEntities_Name)->RangeMultiplier(2)->Range(1<<10, 1<<18)->Complexity();
 
 BENCHMARK(BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers)->Name(BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name);
 
-BENCHMARK(BM_SelectPairsOfComponentsFromNEntities)->Name(BM_SelectPairsOfComponentsFromNEntities_Name)->RangeMultiplier(2)->Range(1<<10, (1<<18))->Complexity();
+BENCHMARK(BM_SelectPairsOfComponentsFromNEntities)->Name(BM_SelectPairsOfComponentsFromNEntities_Name)->RangeMultiplier(2)->Range(1<<10, 1<<18)->Complexity();
 
 BENCHMARK(BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers)->Name(BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityManagers_Name);
 BENCHMARK(BM_CreateAndTransferEmptyEntity)->Name(BM_CreateAndTransferEmptyEntity_Name);

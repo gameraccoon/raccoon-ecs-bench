@@ -6,6 +6,12 @@ import shutil
 import sys
 
 
+def remove_prefix(text, prefix):
+	if text.startswith(prefix):
+		return text[len(prefix):].lstrip()
+	return text
+
+
 def remove_old_results():
 	bin_path = "./bin"
 	if os.path.exists(bin_path) and os.path.isdir(bin_path):
@@ -29,6 +35,8 @@ def run_benchmark(executable_path, output_path, output_format):
 
 
 def convert_gbench_json_result_to_markdown(json_path):
+	aggregate_only_flag = "[Aggregate only]"
+
 	md_description = ""
 	
 	with open(json_path) as results_data_file:
@@ -52,6 +60,9 @@ def convert_gbench_json_result_to_markdown(json_path):
 		aggregate_benchmarks = []
 		for benchmark in results_data["benchmarks"]:
 			if benchmark["run_type"] == "iteration":
+				if benchmark["name"].startswith(aggregate_only_flag):
+					continue
+
 				if benchmark["name"].find("{N}") != -1:
 					slash_index = benchmark["name"].rfind("/")
 					benchmark["name"] = benchmark["name"][:slash_index].replace("{N}", benchmark["name"][slash_index+1:])
@@ -66,7 +77,7 @@ def convert_gbench_json_result_to_markdown(json_path):
 			md_description += "\n### BigO Complexities\nBenchmark | Complexity | Coefficient\n--- | --- | ---\n"
 			for benchmark in aggregate_benchmarks:
 				if benchmark["aggregate_name"] == "BigO":
-					benchmark["name"] = benchmark["name"][:-5].replace("{N}", "**N**")
+					benchmark["name"] = remove_prefix(benchmark["name"][:-5].replace("{N}", "**N**"), aggregate_only_flag)
 					md_description += "{name} | {big_o} | {cpu_coefficient:.2f}\n".format(**benchmark)
 
 
