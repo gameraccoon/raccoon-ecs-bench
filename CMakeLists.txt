@@ -3,7 +3,7 @@ project(RaccoonEcsBenchmark)
 
 set(CMAKE_CXX_STANDARD 20)
 set(GAME_BASE_DIR ${CMAKE_SOURCE_DIR})
-set(GOOGLE_BENCHMARK_DIR "../benchmark")
+set(GOOGLE_BENCHMARK_DIR "${CMAKE_SOURCE_DIR}/../benchmark")
 set(BIN_DIR "${GAME_BASE_DIR}/bin")
 
 file(MAKE_DIRECTORY ${BIN_DIR})
@@ -17,7 +17,8 @@ else()
 endif()
 
 include_directories(
-	"${GOOGLE_BENCHMARK_DIR}/include"
+        "${GOOGLE_BENCHMARK_DIR}/include"
+        "${GOOGLE_BENCHMARK_DIR}/build/include"
 	"raccoon-ecs"
 )
 
