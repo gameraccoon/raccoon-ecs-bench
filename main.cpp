@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <random>
-#include <chrono>
 #include <memory>
 #include <deque>
 
@@ -300,7 +299,7 @@ static void BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes(benchmar
 	}
 }
 
-static void PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(
+static void PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(
 	EntityManager& entityManager,
 	std::mt19937& rng,
 	size_t entityCount
@@ -336,7 +335,7 @@ static void BM_IterateOverAboutNEntities(benchmark::State& state)
 	std::mt19937 rng(42);
 
 	const size_t entitiesCount = static_cast<size_t>(state.range(0));
-	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
+	PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
 	entityManager.initIndex<MovementComponent, TransformComponent>();
 
 	for (auto _ : state)
@@ -362,7 +361,7 @@ static void BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16Entity
 	for (size_t i = 0; i < 16; ++i)
 	{
 		entityManagers.emplace_back(componentFactory, entityGenerator);
-		PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
+		PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
 	}
 
 	auto processor = [](MovementComponent* movement, TransformComponent* transform)
@@ -392,7 +391,7 @@ static void BM_SelectPairsOfComponentsFromNEntities(benchmark::State& state) {
 
 	std::mt19937 rng(42);
 
-	PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
+	PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManager, rng, entitiesCount);
 
 	std::vector<std::tuple<MovementComponent*, TransformComponent*>> components;
 	components.reserve(entitiesCount / 3); // by 3 instead of 4 to have some spare space
@@ -417,7 +416,7 @@ static void BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityMan
 	for (size_t i = 0; i < 16; ++i)
 	{
 		entityManagers.emplace_back(componentFactory, entityGenerator);
-		PrepareEntityManagerWithEntitesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
+		PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
 	}
 
 	std::vector<std::tuple<MovementComponent*, TransformComponent*>> components;
