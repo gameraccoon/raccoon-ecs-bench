@@ -26,7 +26,6 @@ enum class ComponentType
 
 using EntityManager = RaccoonEcs::EntityManagerImpl<ComponentType>;
 using ComponentFactory = RaccoonEcs::ComponentFactoryImpl<ComponentType>;
-using EntityGenerator = RaccoonEcs::IncrementalEntityGenerator;
 using Entity = RaccoonEcs::Entity;
 
 struct TransformComponent

@@ -13,16 +13,14 @@ static void BM_EmptyEntityManagerCreation(benchmark::State& state) {
 	for (auto _ : state)
 	{
 		ComponentFactory componentFactory;
-		EntityGenerator entityGenerator;
-		EntityManager entityManager(componentFactory, entityGenerator);
+		EntityManager entityManager(componentFactory);
 	}
 }
 
 static std::string BM_EmptyEntityAddition_Name = "Add one entity without components";
 static void BM_EmptyEntityAddition(benchmark::State& state) {
 	ComponentFactory componentFactory;
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	for (auto _ : state)
 	{
@@ -34,8 +32,7 @@ static std::string BM_CreateEntityWithOneComponent_Name = "Add one entity with o
 static void BM_CreateEntityWithOneComponent(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	for (auto _ : state)
 	{
@@ -48,8 +45,7 @@ static std::string BM_CreateEntityWithOneComponentWithOneNonMatchingIndex_Name =
 static void BM_CreateEntityWithOneComponentWithOneNonMatchingIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	entityManager.initIndex<ComponentTwo>();
 
@@ -64,8 +60,7 @@ static std::string BM_CreateEntityWithOneComponentInOneIndex_Name = "Add one ent
 static void BM_CreateEntityWithOneComponentInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	entityManager.initIndex<ComponentOne>();
 
@@ -80,13 +75,12 @@ static std::string BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneInd
 static void BM_CreateEntityManagerAndAddNEntitiesWithOneComponentInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
 
 	const int componentsCount = state.range(0);
 
 	for (auto _ : state)
 	{
-		EntityManager entityManager(componentFactory, entityGenerator);
+		EntityManager entityManager(componentFactory);
 		entityManager.initIndex<ComponentOne>();
 		for (int i = 0; i < componentsCount; ++i)
 		{
@@ -101,8 +95,7 @@ static std::string BM_CreateEntityWithSixteenComponents_Name = "Add one entity w
 static void BM_CreateEntityWithSixteenComponents(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	for (auto _ : state)
 	{
@@ -130,8 +123,7 @@ static std::string BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndex
 static void BM_CreateEntityWithSixteenComponentsWithEightNonMatchingIndexes(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	entityManager.initIndex<TransformComponent, ComponentOne, ComponentTwo, ComponentThree, ComponentFour,
 		ComponentFive, ComponentSix, ComponentSeven, ComponentEight, ComponentNine, ComponentTen, ComponentEleven,
@@ -181,8 +173,7 @@ static std::string BM_CreateEntityWithSixteenComponentsInOneSmallIndex_Name = "A
 static void BM_CreateEntityWithSixteenComponentsInOneSmallIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	entityManager.initIndex<ComponentNine>();
 
@@ -212,8 +203,7 @@ static std::string BM_CreateEntityWithSixteenComponentsInOneBigIndex_Name = "Add
 static void BM_CreateEntityWithSixteenComponentsInOneBigIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	entityManager.initIndex<ComponentOne, ComponentTwo, ComponentThree, ComponentFour, ComponentFive,
 		ComponentSix, ComponentSeven, ComponentEight, ComponentNine, ComponentTen, ComponentEleven,
@@ -245,8 +235,7 @@ static std::string BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes_N
 static void BM_CreateEntityWithSixteenComponentsInEightDifferentIndexes(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	// include all components
 	entityManager.initIndex<ComponentOne, ComponentTwo, ComponentThree, ComponentFour, ComponentFive,
@@ -330,8 +319,7 @@ static void BM_IterateOverAboutNEntities(benchmark::State& state)
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
 	componentFactory.registerComponent<MovementComponent>();
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 	std::mt19937 rng(42);
 
 	const size_t entitiesCount = static_cast<size_t>(state.range(0));
@@ -354,13 +342,12 @@ static void BM_IterateOverAbout1000PairsOfComponentsFrom4000EntitiesFrom16Entity
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
 	componentFactory.registerComponent<MovementComponent>();
-	EntityGenerator entityGenerator;
 	std::mt19937 rng(42);
 
 	std::deque<EntityManager> entityManagers;
 	for (size_t i = 0; i < 16; ++i)
 	{
-		entityManagers.emplace_back(componentFactory, entityGenerator);
+		entityManagers.emplace_back(componentFactory);
 		PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
 	}
 
@@ -384,8 +371,7 @@ static void BM_SelectPairsOfComponentsFromNEntities(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
 	componentFactory.registerComponent<MovementComponent>();
-	EntityGenerator entityGenerator;
-	EntityManager entityManager(componentFactory, entityGenerator);
+	EntityManager entityManager(componentFactory);
 
 	const size_t entitiesCount = static_cast<size_t>(state.range(0));
 
@@ -409,13 +395,12 @@ static void BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityMan
 	ComponentFactory componentFactory;
 	componentFactory.registerComponent<TransformComponent>();
 	componentFactory.registerComponent<MovementComponent>();
-	EntityGenerator entityGenerator;
 	std::mt19937 rng(42);
 
 	std::deque<EntityManager> entityManagers;
 	for (size_t i = 0; i < 16; ++i)
 	{
-		entityManagers.emplace_back(componentFactory, entityGenerator);
+		entityManagers.emplace_back(componentFactory);
 		PrepareEntityManagerWithEntitiesWithTwoRandomlyDistributedComponents(entityManagers.back(), rng, 4000);
 	}
 
@@ -434,9 +419,8 @@ static void BM_SelectByAbout1000PairsOfComponentsFrom4000EntitiesFrom16EntityMan
 static std::string BM_CreateAndTransferEmptyEntity_Name = "Create and transfer entity without components to another entity manager";
 static void BM_CreateAndTransferEmptyEntity(benchmark::State& state) {
 	ComponentFactory componentFactory;
-	EntityGenerator entityGenerator;
-	EntityManager entityManager1(componentFactory, entityGenerator);
-	EntityManager entityManager2(componentFactory, entityGenerator);
+	EntityManager entityManager1(componentFactory);
+	EntityManager entityManager2(componentFactory);
 
 	for (auto _ : state)
 	{
@@ -449,9 +433,8 @@ static std::string BM_CreateAndTransferEntityWithTwoComponents_Name = "Create an
 static void BM_CreateAndTransferEntityWithTwoComponents(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager1(componentFactory, entityGenerator);
-	EntityManager entityManager2(componentFactory, entityGenerator);
+	EntityManager entityManager1(componentFactory);
+	EntityManager entityManager2(componentFactory);
 
 	for (auto _ : state)
 	{
@@ -466,9 +449,8 @@ static std::string BM_CreateAndTransferEntityWithTwoComponentsInOneIndex_Name = 
 static void BM_CreateAndTransferEntityWithTwoComponentsInOneIndex(benchmark::State& state) {
 	ComponentFactory componentFactory;
 	RegisterNumberedComponents(componentFactory);
-	EntityGenerator entityGenerator;
-	EntityManager entityManager1(componentFactory, entityGenerator);
-	EntityManager entityManager2(componentFactory, entityGenerator);
+	EntityManager entityManager1(componentFactory);
+	EntityManager entityManager2(componentFactory);
 
 	entityManager1.initIndex<ComponentOne, ComponentTwo>();
 	entityManager2.initIndex<ComponentOne, ComponentTwo>();
